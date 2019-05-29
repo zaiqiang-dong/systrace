@@ -148,7 +148,7 @@ def dumpTrace(out):
     while True:
         d = f.read(64 * 1024 * 1024)
         if not d: break
-        out.write(d.replace('\n', '\\n\\\n').replace('\r', ''))
+        out.write(d)
 
 html_prefix = """<!DOCTYPE HTML>
 <html>
@@ -223,15 +223,13 @@ def main(options):
     css = compiled_css_tag % (open(css_path).read())
     js = compiled_js_tag % (open(script_path).read())
 
-    startTrace(options)
-    time.sleep(options.trace_time)
-    stopTrace()
-
     filename = os.path.abspath(options.output_file)
     out = open(filename, 'w')
-    out.write(html_prefix%(css, js))
+
+    startTrace(options)
+    time.sleep(options.trace_time)
     dumpTrace(out)
-    out.write(html_suffix)
+    stopTrace()
     del out
 
     clearTrace()
@@ -240,7 +238,7 @@ def main(options):
     sys.stdout.write('wrote output file://' + filename + '\n')
     sys.stdout.flush()
 
-    
+
 if __name__ == '__main__':
     parser = optparse.OptionParser()
     parser.add_option('-o', dest='output_file', help='write HTML to FILE',
