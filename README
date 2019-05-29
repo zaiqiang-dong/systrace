@@ -18,6 +18,8 @@ Options:
 -s, --no-cpu-sched  inhibit tracing CPU scheduler (allows longer trace times by reducing data rate into buffer)
 -w, --workqueue     trace the kernel workqueues (requires root)
 -g, --gpu           trace GPU events
+-e TRACE_EVENT, --trace-event=TRACE_EVENT	trace Custom events
+
 
 #DONE
 -------
