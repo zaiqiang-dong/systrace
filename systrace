@@ -6,8 +6,6 @@ import sys, os, time
 import signal
 import optparse
 
-DEBUG = False
-
 DEBUG_DIR = '/sys/kernel/debug/'
 TRACE_DIR = DEBUG_DIR + 'tracing/'
 
@@ -40,9 +38,11 @@ SCRIPT_DIR = os.path.dirname(SCRIPT_PATH)
 def setEnable(filename, enable):
     if os.access(filename, os.W_OK):
         open(filename, 'w').write(enable and '1' or '0')
+        if options.verbose:
+            sys.stdout.write('write failed: %s %s\n' % (filename, enable))
         return True
-    if DEBUG:
-        sys.stderr.write('open failed: %s %s\n' % (filename, enable))
+    elif options.verbose:
+        sys.stdout.write('write failed: %s %s\n' % (filename, enable))
     return False
 
 def setTraceOverwrite(enable):
@@ -93,7 +93,7 @@ def setCustomEnable(events, enable):
     for event in event_list:
         custom_event = EVENT_DIR + event + "/enable"
         if not setEnable(custom_event, enable):
-            sys.stderr.write('open failed: %s %s\n' % (filename, enable))
+            sys.stderr.write('write failed: %s %s\n' % (filename, enable))
             return False
     return True
 
@@ -111,6 +111,8 @@ def setGlobalClock(enable):
     open(TRACE_CLOCK, 'w').write(enable and 'global' or 'local')
 
 def startTrace(options):
+    if options.verbose:
+        sys.stdout.write('=======Start Tracing=======\n')
     setTraceOverwrite(True)
     if options.trace_cpu_sched:
        setSchedSwitch(True)
@@ -118,16 +120,16 @@ def startTrace(options):
         setFrequency(True)
     if options.trace_cpu_idle:
         setCpuIdle(True)
-    setGovernor(True)
     setTraceBufferSize(options.trace_buf_size)
     setGlobalClock(True)
     if options.trace_gpu:
         setGpu(True)
     setCustomEnable(options.trace_event, True)
 
-    isRoot = True
+    isRoot = False
 
     if isRoot:
+        setGovernor(True)
         setBusUtilization(True)
         setSync(True)
         if options.trace_workqueue:
@@ -138,25 +140,29 @@ def startTrace(options):
     setTracingEnable(True)
 
 def stopTrace():
+    if options.verbose:
+        sys.stdout.write('=======Stop Tracing=======\n')
     setTracingEnable(False)
     setTraceOverwrite(True)
     setSchedSwitch(False)
     setFrequency(False)
-    setGovernor(False)
     setGlobalClock(False)
 
     setGpu(False)
     setCustomEnable(options.trace_event, False)
 
-    isRoot = True
+    isRoot = False
 
     if isRoot:
+        setGovernor(False)
         setBusUtilization(False)
         setSync(False)
         setWorkqueue(False)
         setDisk(False)
 
 def dumpTrace(out):
+    if options.verbose:
+        sys.stdout.write('=======Dump Tracing=======\n')
     f = open(TRACE_PATH)
     while True:
         d = f.read(64 * 1024 * 1024)
@@ -279,6 +285,8 @@ if __name__ == '__main__':
                     action='store_true', help='trace GPU events')
     parser.add_option('-e', '--trace-event', dest='trace_event', type='str',
                     default="", help='trace Custom events')
+    parser.add_option('-v', '--verbose', dest='verbose', default=False,
+                    action='store_true', help='be more verbose')
 
     options, args = parser.parse_args()
 
