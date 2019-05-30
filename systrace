@@ -6,6 +6,65 @@ import sys, os, time
 import signal
 import optparse
 
+SCRIPT_PATH = os.path.abspath(__file__)
+SCRIPT_DIR = os.path.dirname(SCRIPT_PATH)
+
+SIMPLE = True
+if not SIMPLE:
+    html_prefix = """<!DOCTYPE HTML>
+<html>
+<head i18n-values="dir:textdirection;">
+<title>Linux System Trace</title>
+%s
+%s
+<script language="javascript">
+document.addEventListener('DOMContentLoaded', function() {
+  if (!linuxPerfData)
+    return;
+
+  var m = new tracing.TimelineModel(linuxPerfData);
+  var timelineViewEl = document.querySelector('.view');
+  base.ui.decorate(timelineViewEl, tracing.TimelineView);
+  timelineViewEl.model = m;
+  timelineViewEl.tabIndex = 1;
+  timelineViewEl.timeline.focusElement = timelineViewEl;
+});
+</script>
+<style>
+  .view {
+    overflow: hidden;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    right: 0;
+  }
+</style>
+</head>
+<body>
+  <div class="view">
+  </div>
+<!-- BEGIN TRACE -->
+  <script>
+  var linuxPerfData = "\\
+"""
+
+    html_suffix = """\\n";
+  </script>
+<!-- END TRACE -->
+</body>
+</html>
+"""
+
+    compiled_css_tag = """<style type="text/css">%s</style>"""
+    compiled_js_tag = """<script language="javascript">%s</script>"""
+
+
+    css_path = SCRIPT_DIR + '/style.css'
+    script_path = SCRIPT_DIR + '/script.js'
+
+
+
 DEBUG_DIR = '/sys/kernel/debug/'
 TRACE_DIR = DEBUG_DIR + 'tracing/'
 
@@ -32,8 +91,6 @@ TRACE_DISK = (EVENT_DIR + 'ext4/ext4_sync_file_enter/enable',
 TRACE_ON = TRACE_DIR + 'tracing_on'
 TRACE_PATH = TRACE_DIR + 'trace'
 TRACE_MARKER = TRACE_DIR + 'trace_marker'
-SCRIPT_PATH = os.path.abspath(__file__)
-SCRIPT_DIR = os.path.dirname(SCRIPT_PATH)
 
 def setEnable(filename, enable):
     if os.access(filename, os.W_OK):
@@ -169,57 +226,6 @@ def dumpTrace(out):
         if not d: break
         out.write(d)
 
-html_prefix = """<!DOCTYPE HTML>
-<html>
-<head i18n-values="dir:textdirection;">
-<title>Linux System Trace</title>
-%s
-%s
-<script language="javascript">
-document.addEventListener('DOMContentLoaded', function() {
-  if (!linuxPerfData)
-    return;
-
-  var m = new tracing.TimelineModel(linuxPerfData);
-  var timelineViewEl = document.querySelector('.view');
-  base.ui.decorate(timelineViewEl, tracing.TimelineView);
-  timelineViewEl.model = m;
-  timelineViewEl.tabIndex = 1;
-  timelineViewEl.timeline.focusElement = timelineViewEl;
-});
-</script>
-<style>
-  .view {
-    overflow: hidden;
-    position: absolute;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-  }
-</style>
-</head>
-<body>
-  <div class="view">
-  </div>
-<!-- BEGIN TRACE -->
-  <script>
-  var linuxPerfData = "\\
-"""
-
-html_suffix = """\\n";
-  </script>
-<!-- END TRACE -->
-</body>
-</html>
-"""
-
-compiled_css_tag = """<style type="text/css">%s</style>"""
-compiled_js_tag = """<script language="javascript">%s</script>"""
-
-css_path = SCRIPT_DIR + '/style.css'
-script_path = SCRIPT_DIR + '/script.js'
-
 def sig_handler(sig, frame):
     if sig in (signal.SIGTERM, signal.SIGQUIT, signal.SIGINT):
         stopTrace()
@@ -239,16 +245,21 @@ def main(options):
     for sig in (signal.SIGTERM, signal.SIGQUIT, signal.SIGINT):
         signal.signal(sig, sig_handler)
 
-    css = compiled_css_tag % (open(css_path).read())
-    js = compiled_js_tag % (open(script_path).read())
+    if not SIMPLE:
+        css = compiled_css_tag % (open(css_path).read())
+        js = compiled_js_tag % (open(script_path).read())
 
     filename = os.path.abspath(options.output_file)
     out = open(filename, 'w')
+    if not SIMPLE:
+        out.write(html_prefix%(css, js))
 
     startTrace(options)
     time.sleep(options.trace_time)
     dumpTrace(out)
     stopTrace()
+    if not SIMPLE:
+        out.write(html_suffix)
     del out
 
     clearTrace()
