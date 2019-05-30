@@ -33,3 +33,19 @@ add ext4/block request parser from old systrace
   add userspace support library
   integrate with policykit
   ftrace_tracing_mark
+
+#USE -------
+
+
+```cpp
+python systrace  -e "irq,sched/tracing_mark_write"
+```
+
+![run_systrace](./doc/run_systrace.png)
+
+open your chrome tracing page chrome://tracing
+
+Drag trace.html into the chrome window
+
+
+![chrome_tracing](./doc/chrome_tracing.png)

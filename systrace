@@ -302,12 +302,6 @@ if __name__ == '__main__':
     options, args = parser.parse_args()
 
     if os.getuid() != 0:
-        if False:
-            cmd = ['pkexec', sys.executable, SCRIPT_PATH] + sys.argv[1:]
-            try:
-                os.execlp(cmd[0], *cmd)
-            except OSError:
-                pass
         cmd = ['sudo', sys.executable, SCRIPT_PATH] + sys.argv[1:]
         os.execlp(cmd[0], *cmd)
 
