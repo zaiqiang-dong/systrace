@@ -255,6 +255,9 @@ def stopTrace():
 def dumpTrace(out):
     if options.verbose:
         sys.stdout.write('=======Dump Tracing=======\n')
+
+    time.sleep(options.trace_time)
+
     f = open(TRACE_PATH)
     while True:
         d = f.read(64 * 1024 * 1024)
@@ -291,7 +294,6 @@ def main(options):
 
     clearTrace()
     startTrace(options)
-    time.sleep(options.trace_time)
     dumpTrace(out)
     stopTrace()
     if not SIMPLE:
