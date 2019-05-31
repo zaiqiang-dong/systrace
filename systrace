@@ -91,12 +91,13 @@ TRACE_DISK = (EVENT_DIR + 'ext4/ext4_sync_file_enter/enable',
 TRACE_ON = TRACE_DIR + 'tracing_on'
 TRACE_PATH = TRACE_DIR + 'trace'
 TRACE_MARKER = TRACE_DIR + 'trace_marker'
+TRACE_EVENT_PID = TRACE_DIR + 'set_event_pid'
 
 def setEnable(filename, enable):
     if os.access(filename, os.W_OK):
         open(filename, 'w').write(enable and '1' or '0')
         if options.verbose:
-            sys.stdout.write('write failed: %s %s\n' % (filename, enable))
+            sys.stdout.write('write success: %s %s\n' % (filename, enable))
         return True
     elif options.verbose:
         sys.stdout.write('write failed: %s %s\n' % (filename, enable))
@@ -154,12 +155,25 @@ def setCustomEnable(events, enable):
             return False
     return True
 
+def setPid(trace_pid, enable):
+    if len(trace_pid) == 0 or trace_pid.isspace():
+        return True
+    if enable:
+        pids = trace_pid.strip().split(',')
+        for pid in pids:
+            open(TRACE_EVENT_PID, "a+").write(pid)
+        if options.verbose:
+            sys.stdout.write('set pid success: %s\n' %(pid))
+    else:
+        open(TRACE_EVENT_PID, "w").write("")
+
 def setTracingEnable(enable):
     return setEnable(TRACE_ON, enable)
 
 def clearTrace():
-    fd = os.open(TRACE_PATH, os.O_CREAT|os.O_WRONLY|os.O_TRUNC)
-    os.close(fd)
+    if options.verbose:
+        sys.stdout.write('=======Clear Tracing=======\n')
+    open(TRACE_PATH, 'w').write("")
 
 def setTraceBufferSize(size):
     open(TRACE_BUFFER_SIZE, 'w').write('%d'%size)
@@ -182,6 +196,7 @@ def startTrace(options):
     if options.trace_gpu:
         setGpu(True)
     setCustomEnable(options.trace_event, True)
+    setPid(options.trace_pid, True)
 
     isRoot = False
 
@@ -207,6 +222,7 @@ def stopTrace():
 
     setGpu(False)
     setCustomEnable(options.trace_event, False)
+    setPid(options.trace_pid, False)
 
     isRoot = False
 
@@ -254,6 +270,7 @@ def main(options):
     if not SIMPLE:
         out.write(html_prefix%(css, js))
 
+    clearTrace()
     startTrace(options)
     time.sleep(options.trace_time)
     dumpTrace(out)
@@ -298,6 +315,8 @@ if __name__ == '__main__':
                     default="", help='trace Custom events')
     parser.add_option('-v', '--verbose', dest='verbose', default=False,
                     action='store_true', help='be more verbose')
+    parser.add_option('-p', '--pid', dest='trace_pid', type="str", default='',
+                    help='Record events pn existing process ID')
 
     options, args = parser.parse_args()
 
