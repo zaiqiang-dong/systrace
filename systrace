@@ -92,6 +92,7 @@ TRACE_ON = TRACE_DIR + 'tracing_on'
 TRACE_PATH = TRACE_DIR + 'trace'
 TRACE_MARKER = TRACE_DIR + 'trace_marker'
 TRACE_EVENT_PID = TRACE_DIR + 'set_event_pid'
+TRACE_SCHED_FILTER = EVENT_DIR + 'sched/filter'
 
 def setEnable(filename, enable):
     if os.access(filename, os.W_OK):
@@ -163,9 +164,25 @@ def setPid(trace_pid, enable):
         for pid in pids:
             open(TRACE_EVENT_PID, "a+").write(pid)
         if options.verbose:
-            sys.stdout.write('set pid success: %s\n' %(pid))
+            sys.stdout.write('set-pid success: %s\n' %(pid))
     else:
         open(TRACE_EVENT_PID, "w").write("")
+        if options.verbose:
+            sys.stdout.write('clr-pid success: %s\n' %(pid))
+
+def setFilter(trace_filter, enable):
+    if len(trace_filter) == 0 or trace_filter.isspace():
+        return True
+
+    if enable:
+        trace_filter = trace_filter.strip()
+        open(TRACE_SCHED_FILTER, "w").write(trace_filter)
+    else:
+        open(TRACE_SCHED_FILTER, "w").write(" ")
+
+    if options.verbose:
+        sys.stdout.write('filter success: %s %s\n' % (trace_filter, enable))
+    return True
 
 def setTracingEnable(enable):
     return setEnable(TRACE_ON, enable)
@@ -197,6 +214,7 @@ def startTrace(options):
         setGpu(True)
     setCustomEnable(options.trace_event, True)
     setPid(options.trace_pid, True)
+    setFilter(options.trace_filter, True)
 
     isRoot = False
 
@@ -223,6 +241,7 @@ def stopTrace():
     setGpu(False)
     setCustomEnable(options.trace_event, False)
     setPid(options.trace_pid, False)
+    setFilter(options.trace_filter, False)
 
     isRoot = False
 
@@ -296,7 +315,7 @@ if __name__ == '__main__':
                     default=2048, help='use a trace buffer size of N KB', metavar='N')
     parser.add_option('-d', '--disk', dest='trace_disk', default=False,
                     action='store_true', help='trace disk I/O (requires root)')
-    parser.add_option('-f', '--cpu-freq', dest='trace_cpu_freq', default=False,
+    parser.add_option('-F', '--cpu-freq', dest='trace_cpu_freq', default=False,
                     action='store_true', help='trace CPU frequency changes')
     parser.add_option('-i', '--cpu-idle', dest='trace_cpu_idle', default=False,
                     action='store_true', help='trace CPU idle events')
@@ -317,6 +336,8 @@ if __name__ == '__main__':
                     action='store_true', help='be more verbose')
     parser.add_option('-p', '--pid', dest='trace_pid', type="str", default='',
                     help='Record events pn existing process ID')
+    parser.add_option('-f', '--filter', dest='trace_filter', type="str", default='',
+                    help='trace event filter')
 
     options, args = parser.parse_args()
 
