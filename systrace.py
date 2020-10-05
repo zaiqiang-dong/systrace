@@ -152,7 +152,7 @@ def setCustomEnable(events, enable):
     for event in event_list:
         custom_event = EVENT_DIR + event + "/enable"
         if not setEnable(custom_event, enable):
-            sys.stderr.write('write failed: %s %s\n' % (filename, enable))
+            sys.stderr.write('write failed: %s %s\n' % (custom_event, enable))
             return False
     return True
 
