@@ -1,6 +1,10 @@
 This is systrace script for Linux Desktop/Server
 
-# USAGE
+# 1 Description
+-------
+
+
+## 1.1 Usage
 -------
 
 python systrace -h
@@ -26,22 +30,24 @@ Options:
 | -e TRACE_EVENT, --trace-event=TRACE_EVENT | trace Custom events	|
 
 
-# DONE
+## 1.2 DONE
 -------
 
 add ext4/block request parser from old systrace
 
 
-# TODO
+## 1.3 TODO
 -------
 
   add userspace support library
   integrate with policykit
   ftrace_tracing_mark
 
-# USE
+# 2 USE
 -------
 
+## 2.1 systrace
+-------
 
 
 ```cpp
@@ -56,3 +62,9 @@ Drag trace.html into the chrome window
 
 
 ![chrome_tracing](./doc/chrome_tracing.png)
+
+## 2.2 fix_time
+-------
+
+
+![fix_time](./doc/fix_time.png)
