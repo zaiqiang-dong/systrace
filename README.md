@@ -68,3 +68,14 @@ Drag trace.html into the chrome window
 
 
 ![fix_time](./doc/fix_time.png)
+
+# 3 Reference
+-------
+
+[Parser for Linux Ftrace (Android Systrace) logs for system power & performance analysis.](https://github.com/corakwue/ftrace/tree/master/ftrace)
+
+[Unity Systrace Plugin for Android](https://github.com/Over17/UnitySystracePlugin)
+
+[Systrace Analysis Tool](https://github.com/Lynazhang/systrace_analysis_tool)
+
+[Systrace scripts](https://github.com/zhangdongfeng/systrace)
