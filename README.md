@@ -66,8 +66,26 @@ Drag trace.html into the chrome window
 ## 2.2 fix_time
 -------
 
+We can see that the time shown in the Trace-Viewer(systrace)
+is relative-time,
+
+![relative_time](./doc/relative_time.png)
+
+However, the time displayed in the ftrace dumping is the system
+time(absolute time).
+
+![absolute_time](./doc/absolute_time.png)
+
+Use the script `fix_time.pl` to adjust absolute-time to relative-time.
+
+```cpp
+perl scripts/fix_time.pl ./trace.html  trace.html.js
+```
+
+The relative time is shown in the output file `trace.html.js`
 
 ![fix_time](./doc/fix_time.png)
+
 
 # 3 Reference
 -------
