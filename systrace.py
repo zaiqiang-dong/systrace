@@ -71,6 +71,7 @@ TRACE_DIR = DEBUG_DIR + 'tracing/'
 TRACE_CLOCK = TRACE_DIR + 'trace_clock'
 TRACE_BUFFER_SIZE = TRACE_DIR + 'buffer_size_kb'
 TRACE_OVERWRITE = TRACE_DIR + 'options/overwrite'
+TRACE_RECORD_TGID = TRACE_DIR + 'options/record-tgid'
 
 EVENT_DIR = TRACE_DIR + 'events/'
 TRACE_SWITCH = EVENT_DIR + 'sched/sched_switch/enable'
@@ -106,6 +107,9 @@ def setEnable(filename, enable):
 
 def setTraceOverwrite(enable):
     return setEnable(TRACE_OVERWRITE, enable)
+
+def setTraceRecordTgid(enable):
+    return setEnable(TRACE_RECORD_TGID, enable)
 
 def setSchedSwitch(enable):
     if setEnable(TRACE_SWITCH, enable) and setEnable(TRACE_WAKEUP, enable):
@@ -202,6 +206,7 @@ def startTrace(options):
     if options.verbose:
         sys.stdout.write('=======Start Tracing=======\n')
     setTraceOverwrite(True)
+    setTraceRecordTgid(True)
     if options.trace_cpu_sched:
        setSchedSwitch(True)
     if options.trace_cpu_freq:
@@ -234,6 +239,8 @@ def stopTrace():
         sys.stdout.write('=======Stop Tracing=======\n')
     setTracingEnable(False)
     setTraceOverwrite(True)
+    setTraceRecordTgid(False)
+
     setSchedSwitch(False)
     setFrequency(False)
     setGlobalClock(False)

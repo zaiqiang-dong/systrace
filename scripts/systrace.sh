@@ -6,6 +6,9 @@ trace_clean()
 {
 	echo 0 > $TRACING_PATH/tracing_on
 	echo 0 > $TRACING_PATH/events/enable
+
+	echo 0 > $TRACING_PATH/options/record-tgid
+
 	echo > $TRACING_PATH/trace
 }
 
@@ -16,6 +19,8 @@ get_systrace()
 
 	rm -rf trace.html
 	echo > $TRACING_PATH/trace
+
+	echo 1 > $TRACING_PATH/options/record-tgid
 
 	echo 1 > $TRACING_PATH/events/sched/sched_wakeup/enable
 	echo 1 > $TRACING_PATH/events/sched/sched_wakeup_new/enable
