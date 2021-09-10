@@ -22,10 +22,17 @@ get_systrace()
 
 	echo 1 > $TRACING_PATH/options/record-tgid
 
+	# sched
 	echo 1 > $TRACING_PATH/events/sched/sched_wakeup/enable
 	echo 1 > $TRACING_PATH/events/sched/sched_wakeup_new/enable
 	echo 1 > $TRACING_PATH/events/sched/sched_switch/enable
+
+	# irq and ipi
 	echo 1 > $TRACING_PATH/events/irq/enable
+	echo 1 > $TRACING_PATH/events/ipi/enable
+
+	# idle
+	echo 1 > $TRACING_PATH/events/power/cpu_idle/enable
 
 	echo 1 > $TRACING_PATH/tracing_on
 
