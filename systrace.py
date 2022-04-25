@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- encoding: utf-8 -*-
-# vim: ts=4 st=4 sts=4 expandtab syntax=python
 
 import sys, os, time
 import signal
