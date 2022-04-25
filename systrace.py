@@ -190,6 +190,7 @@ def setFilter(trace_filter, enable):
 def setTracingEnable(enable):
     return setEnable(TRACE_ON, enable)
 
+# 向 /sys/kernel/debug/tracing/trace 写空值
 def clearTrace():
     if options.verbose:
         sys.stdout.write('=======Clear Tracing=======\n')
@@ -201,6 +202,7 @@ def setTraceBufferSize(size):
 def setGlobalClock(enable):
     open(TRACE_CLOCK, 'w').write(enable and 'global' or 'local')
 
+# 启动tarce
 def startTrace(options):
     if options.verbose:
         sys.stdout.write('=======Start Tracing=======\n')
@@ -286,19 +288,25 @@ def check_environment():
         sys.exit(1)
 
 def main(options):
+    # 设置信号处理函数
     for sig in (signal.SIGTERM, signal.SIGQUIT, signal.SIGINT):
         signal.signal(sig, sig_handler)
 
+    # 设置css和js脚本
     if not SIMPLE:
         css = compiled_css_tag % (open(css_path).read())
         js = compiled_js_tag % (open(script_path).read())
 
+    # 获取输出文件的绝对路径
     filename = os.path.abspath(options.output_file)
+    # 向输出文件中写入html css js
     out = open(filename, 'w')
     if not SIMPLE:
         out.write(html_prefix%(css, js))
 
+    # 清除原有的tarce项
     clearTrace()
+    # 启动tarce
     startTrace(options)
     dumpTrace(out)
     stopTrace()
